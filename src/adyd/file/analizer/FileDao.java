@@ -2,6 +2,7 @@ package adyd.file.analizer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.StringTokenizer;
 
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 
@@ -10,6 +11,7 @@ public class FileDao {
 	private File file;
 	private boolean isDirectory, isExtra, isPdf;
 	private Miniatura mini;
+	private String tsrId, tsrId2, name;
 	
 	public FileDao(File file) throws InvalidPasswordException, IOException {
 		this.file = file;
@@ -63,6 +65,14 @@ public class FileDao {
 	}
 
 
+	public String getTsrId() {
+		return tsrId;
+	}
+	
+	public String getTsrId2() {
+		return tsrId2;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -73,7 +83,7 @@ public class FileDao {
 		result = prime * result + (isPdf ? 1231 : 1237);
 		return result;
 	}
-	
+
 	public boolean isDirectory() {
 		return isDirectory;
 	}
@@ -84,6 +94,24 @@ public class FileDao {
 
 	public boolean isPdf() {
 		return isPdf;
+	}
+
+	private void parseName(String name) {
+		StringTokenizer st = new StringTokenizer(name, " ");
+		StringBuilder sb = new StringBuilder();
+		while(st.hasMoreTokens()) {
+			String token = st.nextToken();
+			if(token.startsWith("TSR")) {
+				this.tsrId = token;
+			} else if(token.matches("[0-9]{4}")) {
+				this.tsrId += " " + token;
+			} else if(token.matches("^[A-Z][A-Z,0-9]{2}")) {
+				this.tsrId2 = token;
+			} else {
+				sb.append(token + " "); 
+			}
+		}
+		this.name = sb.toString();
 	}
 
 	public void setDirectory(boolean isDirectory) {
@@ -102,14 +130,23 @@ public class FileDao {
 		mini = new Miniatura(this.file);
 		mini.saveMiniatura("c:\\Users\\Jacobo\\png\\");
 	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+
+
 
 	public void setPdf(boolean isPdf) {
 		this.isPdf = isPdf;
 	}
 
+
+
 	private void setTipo() {
 		if(file.getName().endsWith("pdf")){
 			isPdf = true;
+			parseName(file.getName());
 		} else if (file.getName().endsWith("mp3")) {
 			isExtra = true;
 		} else {
@@ -117,6 +154,20 @@ public class FileDao {
 		}
 		
 	}
+
+
+
+	public void setTsrId(String tsrId) {
+		this.tsrId = tsrId;
+	}
+
+
+
+	public void setTsrId2(String tsrId2) {
+		this.tsrId2 = tsrId2;
+	}
+
+
 
 	@Override
 	public String toString() {

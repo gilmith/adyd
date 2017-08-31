@@ -12,7 +12,7 @@ public class Conector {
 	public Conector(String user, String password) throws SQLException {
 		this.user = user;
 		this.password = password;
-		conection = DriverManager.getConnection("jdbc:oracle:thin@localhost:1512:xe", user, password);
+		conection = DriverManager.getConnection("jdbc:oracle:thin:" + user + "/" + password + "@localhost:1521:xe");
 	}
 
 	public Connection getConection() {
