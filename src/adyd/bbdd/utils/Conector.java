@@ -7,12 +7,9 @@ import java.sql.SQLException;
 public class Conector {
 	
 	public Connection conection;
-	public String user, password;
 	
-	public Conector(String user, String password) throws SQLException {
-		this.user = user;
-		this.password = password;
-		conection = DriverManager.getConnection("jdbc:oracle:thin:" + user + "/" + password + "@localhost:1521:xe");
+	public Conector(String url) throws SQLException {
+		conection = DriverManager.getConnection(url);
 	}
 
 	public Connection getConection() {

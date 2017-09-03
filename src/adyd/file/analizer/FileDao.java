@@ -6,15 +6,25 @@ import java.util.StringTokenizer;
 
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 
+import adyd.utils.Utils;
+
 public class FileDao {
 	
 	private File file;
 	private boolean isDirectory, isExtra, isPdf;
 	private Miniatura mini;
 	private String tsrId, tsrId2, name;
+	private long size;
 	
+	public long getSize() {
+		return size;
+	}
+
+
+
 	public FileDao(File file) throws InvalidPasswordException, IOException {
 		this.file = file;
+		this.size = file.length();
 		setTipo();
 		mini = null;
 		
@@ -128,7 +138,7 @@ public class FileDao {
 
 	public void setMini() throws InvalidPasswordException, IOException {
 		mini = new Miniatura(this.file);
-		mini.saveMiniatura("c:\\Users\\Jacobo\\png\\");
+		mini.saveMiniatura(Utils.getProperties().getProperty("Rutamini"));
 	}
 	
 	public void setName(String name) {
