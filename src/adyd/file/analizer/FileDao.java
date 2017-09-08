@@ -66,7 +66,7 @@ public class FileDao {
 
 
 	public String getName() {
-		return file.getName();
+		return name;
 	}
 
 
