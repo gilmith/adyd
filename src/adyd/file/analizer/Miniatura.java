@@ -4,20 +4,24 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.tools.imageio.ImageIOUtil;
 
+import adyd.main.MainExecutor;
+
 public class Miniatura {
 	
 	private BufferedImage bim;
 	private String nombre;
+	private final static Logger logger = Logger.getLogger(Miniatura.class);
 
 	public Miniatura(File fichero) throws InvalidPasswordException, IOException {
 		nombre = fichero.getName();
-		System.out.println("extrayendo el fichero " + fichero.getAbsolutePath());
+		logger.info("extrayendo el fichero " + fichero.getAbsolutePath());
         PDDocument document = PDDocument.load(fichero);
         PDFRenderer pdfRenderer = new PDFRenderer(document);
         bim = pdfRenderer.renderImageWithDPI(0, 100, ImageType.RGB);
@@ -68,8 +72,7 @@ public class Miniatura {
 		try {
 			ImageIOUtil.writeImage(bim, nombre, 100);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error al generar la miniatura", e);
 		}
 	}
 

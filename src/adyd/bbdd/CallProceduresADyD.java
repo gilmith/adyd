@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import org.apache.log4j.Logger;
+
 import adyd.utils.Utils;
 
 public class CallProceduresADyD {
@@ -12,7 +14,8 @@ public class CallProceduresADyD {
 	private Connection conn;
 	private int idFile;
 	private String mensaje;
-	
+	private final static Logger logger = Logger.getLogger(CallProceduresADyD.class);
+
 	
 	public CallProceduresADyD(Connection conn) {
 		this.conn = conn;	
@@ -45,6 +48,7 @@ public class CallProceduresADyD {
 	public int getColeccion(String call, String modulo) {
 		int salida = 0;
 		try {
+			logger.info("Ejecutando el getColeccion");
 			CallableStatement cstmt = conn.prepareCall(call);
 			cstmt.registerOutParameter(1, Types.INTEGER);
 			cstmt.setString(2, modulo);
@@ -52,7 +56,7 @@ public class CallProceduresADyD {
 			salida = cstmt.getInt(1);
 			cstmt.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.error("Error de BBDD ", e);
 		}
 		return salida;
 	}
@@ -79,6 +83,7 @@ public class CallProceduresADyD {
 			String tsrid, String tsrid2, int coleccion) {
 		CallableStatement cstmtFile;
 		try {
+			logger.info("ejecutando la inserccion de fichero");
 			cstmtFile = conn.prepareCall(call);
 			//call ADYD_PKG.INSERTFILE(?name1, ?path2 ,?size3, ?tsr14 ,?tsr25, ?mini6, ?coleccion7, ?id8, ?mensaje9)
 
@@ -102,7 +107,7 @@ public class CallProceduresADyD {
 			cstmtFile.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error de BBDD ", e);
 		}
 		
 	}
@@ -110,6 +115,7 @@ public class CallProceduresADyD {
 	public int insertModulo(String call, String modulo) {
 		int salida = 0;
 		try {
+			logger.info("Ejecutando la inserccion de modulo");
 			CallableStatement cstmt = conn.prepareCall(call);
 			cstmt.registerOutParameter(1, Types.INTEGER);
 			cstmt.setString(2, modulo);
@@ -117,7 +123,23 @@ public class CallProceduresADyD {
 			salida = cstmt.getInt(1);
 			cstmt.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.error("Error de BBDD ", e);
+		}
+		return salida;
+	}
+	
+	public int getFile(String call, String name) {
+		int salida = -1;
+		try {
+			logger.info("Ejecutando la busqueda de modulo");
+			CallableStatement cstmt = conn.prepareCall(call);
+			cstmt.registerOutParameter(1, Types.INTEGER);
+			cstmt.setString(2, name);
+			cstmt.execute();
+			salida = cstmt.getInt(1);
+			cstmt.close();
+		} catch (SQLException e) {
+			logger.error("Error de BBDD ", e);
 		}
 		return salida;
 	}

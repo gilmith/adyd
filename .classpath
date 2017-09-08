@@ -19,5 +19,6 @@
 	<classpathentry kind="lib" path="C:/Users/Jacobo/lib/xmpbox-2.0.7.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Jacobo/lib/commons-logging-1.2.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Jacobo/lib/fontbox-2.0.7.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jacobo/lib/jars/Log4j1.2/apache-log4j-1.2.17/log4j-1.2.17.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
