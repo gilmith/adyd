@@ -67,7 +67,7 @@ public class MainExecutor {
 						}
 					} else {
 						int codigoAventura = callAdyD.getFile(Utils.getProperties().getProperty("getFile"), fileDao.getName()) ;
-						if(codigoAventura != -1) {
+						if(codigoAventura == -1) {
 							fileDao.setMini();
 							callAdyD.insertFile(Utils.getProperties().getProperty("insertFile"), 
 									fileDao.getName(), fileDao.getPath(), fileDao.getSize(), 

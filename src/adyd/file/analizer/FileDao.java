@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.StringTokenizer;
 
+import org.apache.log4j.Logger;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 
+import adyd.bbdd.CallProceduresADyD;
 import adyd.utils.Utils;
 
 public class FileDao {
@@ -15,6 +17,8 @@ public class FileDao {
 	private Miniatura mini;
 	private String tsrId, tsrId2, name;
 	private long size;
+	private final static Logger logger = Logger.getLogger(FileDao.class);
+	
 	
 	public long getSize() {
 		return size;
@@ -112,16 +116,29 @@ public class FileDao {
 		while(st.hasMoreTokens()) {
 			String token = st.nextToken();
 			if(token.startsWith("TSR")) {
+				logger.info("skip TSR");
+			} else if (token.matches("[0-9]{4}")) {
 				this.tsrId = token;
-			} else if(token.matches("[0-9]{4}")) {
-				this.tsrId += " " + token;
-			} else if(token.matches("^[A-Z][A-Z,0-9]{2}")) {
+			} else if(token.matches("[0-9,A-Z]{5}")) {
+				this.tsrId = token;
+			}else if(token.matches("[0-9,A-Z,-]{6}")) {
+				this.tsrId2 = token;
+			} else if(token.matches("[A-Z,0-9]{2}")) {
+				this.tsrId2 = token;
+			} else if(token.matches("[A-Z,0-9]{3}")) {
+					this.tsrId2 = token;
+			}else if(token.matches("[A-Z,0-9,-]{4}")) {
+				this.tsrId2 = token;
+			} else if(token.matches("[A-Z,0-9]{7}")) {
 				this.tsrId2 = token;
 			} else {
 				sb.append(token + " "); 
 			}
 		}
 		this.name = sb.toString();
+		logger.info("TSRID = " + tsrId);
+		logger.info("TSRID2 = " + tsrId2);
+		logger.info("NAME = " + this.name);
 	}
 
 	public void setDirectory(boolean isDirectory) {
@@ -154,12 +171,12 @@ public class FileDao {
 
 
 	private void setTipo() {
-		if(file.getName().endsWith("pdf")){
+		if(file.getName().endsWith("pdf") && (file.isFile()) ){
 			isPdf = true;
 			parseName(file.getName());
-		} else if (file.getName().endsWith("mp3")) {
+		} else if (file.getName().endsWith("mp3") && (file.isFile())) {
 			isExtra = true;
-		} else {
+		} else if (file.isDirectory()){
 			isDirectory = true;
 		}
 		

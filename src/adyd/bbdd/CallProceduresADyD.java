@@ -131,7 +131,7 @@ public class CallProceduresADyD {
 	public int getFile(String call, String name) {
 		int salida = -1;
 		try {
-			logger.info("Ejecutando la busqueda de modulo");
+			logger.info("Ejecutando la busqueda de aventura ");
 			CallableStatement cstmt = conn.prepareCall(call);
 			cstmt.registerOutParameter(1, Types.INTEGER);
 			cstmt.setString(2, name);
