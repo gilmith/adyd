@@ -1,13 +1,17 @@
 package adyd.bbdd;
 
+import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import adyd.utils.Utils;
+import adyd.web.org.tsr.beans.FileInfo;
+import oracle.jdbc.OracleTypes;
 
 public class CallProceduresADyD {
 	
@@ -142,6 +146,30 @@ public class CallProceduresADyD {
 			logger.error("Error de BBDD ", e);
 		}
 		return salida;
+	}
+	
+	public List<FileInfo> getFileInfo(String nombre){
+		logger.info("Ejecutando la busqueda del webservice");
+		String call = "{ call ADYD_PKG.GET_FILES_INFO(?, ? ,?, ? ,?, ?, ?) }";
+		try {
+			CallableStatement cstmt = conn.prepareCall(call);
+			cstmt.setString(1, nombre);
+			cstmt.registerOutParameter(2, OracleTypes.ARRAY, "TBL_OUTPUT");
+			cstmt.registerOutParameter(3, OracleTypes.ARRAY, "TBL_OUTPUT");
+			cstmt.registerOutParameter(4, OracleTypes.ARRAY, "TBL_OUTPUT");
+			cstmt.registerOutParameter(5, OracleTypes.ARRAY, "TBL_OUTPUT");
+			cstmt.registerOutParameter(6, OracleTypes.ARRAY, "TBL_OUTPUT");
+			cstmt.registerOutParameter(7, OracleTypes.ARRAY, "TBL_OUTPUT");
+			cstmt.execute();
+			Array a = cstmt.getArray(2);
+			Object[] obj = (Object[]) a.getArray();
+//	        a.forEach(System.out::println);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+		
 	}
 
 	public void setIdFile(int idFile) {
