@@ -5,13 +5,16 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import adyd.utils.Utils;
 import adyd.web.org.tsr.beans.FileInfo;
-import oracle.jdbc.OracleTypes;
+import adyd.web.org.tsr.beans.GetFileInfoResponse;
+import adyd.web.org.tsr.beans.Resultado;
 
 public class CallProceduresADyD {
 	
@@ -148,27 +151,44 @@ public class CallProceduresADyD {
 		return salida;
 	}
 	
-	public List<FileInfo> getFileInfo(String nombre){
+//	 PROCEDURE GET_FILES_INFO (V_NOMBRE    IN     ADYD_FILES.NOMBRE%TYPE,
+//             CODIGO         OUT NUMBER, 
+//             RESULTADO      OUT VARCHAR2,
+//             ID             OUT MASTER.TBL_OUTPUT,
+//             TSR_ID         OUT MASTER.TBL_OUTPUT,
+//             TSR_ID2        OUT MASTER.TBL_OUTPUT,
+//             NOMBRE         OUT MASTER.TBL_OUTPUT,
+//             COLECCION      OUT MASTER.TBL_OUTPUT,
+//             MODULO         OUT MASTER.TBL_OUTPUT)
+	public GetFileInfoResponse getFileInfo(String nombre){
 		logger.info("Ejecutando la busqueda del webservice");
-		String call = "{ call ADYD_PKG.GET_FILES_INFO(?, ? ,?, ? ,?, ?, ?) }";
+		String call = "{ call ADYD_PKG.GET_FILES_INFO(?, ?, ?, ? ,?, ? ,?, ?, ?) }";
+		GetFileInfoResponse gfir = new GetFileInfoResponse();
 		try {
 			CallableStatement cstmt = conn.prepareCall(call);
 			cstmt.setString(1, nombre);
-			cstmt.registerOutParameter(2, OracleTypes.ARRAY, "TBL_OUTPUT");
-			cstmt.registerOutParameter(3, OracleTypes.ARRAY, "TBL_OUTPUT");
-			cstmt.registerOutParameter(4, OracleTypes.ARRAY, "TBL_OUTPUT");
-			cstmt.registerOutParameter(5, OracleTypes.ARRAY, "TBL_OUTPUT");
-			cstmt.registerOutParameter(6, OracleTypes.ARRAY, "TBL_OUTPUT");
-			cstmt.registerOutParameter(7, OracleTypes.ARRAY, "TBL_OUTPUT");
+			cstmt.registerOutParameter(2, Types.INTEGER);
+			cstmt.registerOutParameter(3, Types.VARCHAR);
+			cstmt.registerOutParameter(4, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(5, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(6, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(7, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(8, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(9, Types.ARRAY, "MASTER.TBL_OUTPUT");
 			cstmt.execute();
-			Array a = cstmt.getArray(2);
-			Object[] obj = (Object[]) a.getArray();
-//	        a.forEach(System.out::println);
+			Resultado res = new Resultado();
+			res.setCodigo(cstmt.getInt(2));
+			res.setMensaje(cstmt.getString(3));
+			gfir = new GetFileInfoResponse();
+			gfir.setResultado(res);
+			gfir.setListaResultados(setFileInfo(cstmt.getArray(4), 
+					cstmt.getArray(5), cstmt.getArray(6),
+					cstmt.getArray(7), cstmt.getArray(8), cstmt.getArray(9)));
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.error("Error en el SQL", e);
 		}
 		
-		return null;
+		return gfir;
 		
 	}
 
@@ -178,6 +198,36 @@ public class CallProceduresADyD {
 
 	public void setMensaje(String mensaje) {
 		this.mensaje = mensaje;
+	}
+
+	private List<FileInfo> setFileInfo(Array id, Array tsr_id, Array tsr_id2,
+			Array nombre, Array coleccion, Array modulo){
+		logger.info("Construye la respuseta");
+		List<FileInfo> lista = new ArrayList<FileInfo>();
+		try {
+			Object[] valuesId = (Object[])id.getArray();
+			Object[] valuesTsr_id = (Object[])tsr_id.getArray();
+			Object[] valuesTsr_id2 = (Object[])tsr_id2.getArray();
+			Object[] valuesNombre = (Object[])nombre.getArray();
+			Object[] valuesColeccion = (Object[])coleccion.getArray();
+			Object[] valuesModulo = (Object[])modulo.getArray();
+			for(int i = 0; i < valuesId.length; i++) {
+				FileInfo fileInfo = new FileInfo();
+				fileInfo.setId((String) valuesId[i]);
+				fileInfo.setTsr_id((String) valuesTsr_id[i]);
+				fileInfo.setTsr_id2((String)valuesTsr_id2[i]);
+				fileInfo.setNombre((String)valuesNombre[i]);
+				fileInfo.setColeccion((String)valuesColeccion[i]);
+				fileInfo.setModulo((String) valuesModulo[i]);
+				lista.add(fileInfo);
+			}
+			
+		} catch (SQLException e) {
+			logger.error("Error de SQL", e);
+		}
+		
+		return lista;		
+		  
 	}
 
 }

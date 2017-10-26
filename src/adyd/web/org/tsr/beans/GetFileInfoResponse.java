@@ -1,19 +1,21 @@
 package adyd.web.org.tsr.beans;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GetFileInfoResponse {
 	
 	
-	private FileInfo fileInfo;
+	private List<FileInfo> listaResultados;
+
+
+
 	private Resultado resultado;
-	
+
 	public GetFileInfoResponse() {
 		resultado  = new Resultado();
-		resultado.setCodigo(0);
-		resultado.setMensaje("OK");
+		listaResultados = new ArrayList<FileInfo>();
 	}
-
-
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -23,10 +25,10 @@ public class GetFileInfoResponse {
 		if (getClass() != obj.getClass())
 			return false;
 		GetFileInfoResponse other = (GetFileInfoResponse) obj;
-		if (fileInfo == null) {
-			if (other.fileInfo != null)
+		if (listaResultados == null) {
+			if (other.listaResultados != null)
 				return false;
-		} else if (!fileInfo.equals(other.fileInfo))
+		} else if (!listaResultados.equals(other.listaResultados))
 			return false;
 		if (resultado == null) {
 			if (other.resultado != null)
@@ -35,10 +37,12 @@ public class GetFileInfoResponse {
 			return false;
 		return true;
 	}
-
-	public FileInfo getFileInfo() {
-		return fileInfo;
+	
+	public List<FileInfo> getListaResultados() {
+		return listaResultados;
 	}
+
+
 
 	public Resultado getResultado() {
 		return resultado;
@@ -48,13 +52,13 @@ public class GetFileInfoResponse {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((fileInfo == null) ? 0 : fileInfo.hashCode());
+		result = prime * result + ((listaResultados == null) ? 0 : listaResultados.hashCode());
 		result = prime * result + ((resultado == null) ? 0 : resultado.hashCode());
 		return result;
 	}
 
-	public void setFileInfo(FileInfo fileInfo) {
-		this.fileInfo = fileInfo;
+	public void setListaResultados(List<FileInfo> listaResultados) {
+		this.listaResultados = listaResultados;
 	}
 
 	public void setResultado(Resultado resultado) {
