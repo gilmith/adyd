@@ -16,4 +16,10 @@ public interface GetFileInfo {
 	@WebMethod
 	public GetFileInfoResponse getFileInfo(String nombre);
 
+	
+	@WebMethod
+	public GetFileInfoResponse getAllColeccion(String nombre);
+	
+	@WebMethod
+	public GetFileInfoResponse getAllModulos(String nombre);
 }

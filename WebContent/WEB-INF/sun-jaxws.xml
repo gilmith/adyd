@@ -6,12 +6,12 @@
       name="GetFileInfo"
       implementation="adyd.web.org.tsr.impl.GetFileInfoImpl"
       url-pattern="/GetFileInfo"/>
-   <endpoint
+<!--    <endpoint
       name="GetAllColeccion"
       implementation="adyd.web.org.tsr.impl.GetAllColeccion"
       url-pattern="/GetAllColeccion"/>
    <endpoint
       name="GetAllModulos"
       implementation="adyd.web.org.tsr.impl.GetAllModulos"
-      url-pattern="/GetAllModulos"/>
+      url-pattern="/GetAllModulos"/> -->
 </endpoints>

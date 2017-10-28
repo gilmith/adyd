@@ -20,14 +20,14 @@ Inc.//DTD Web Application 2.3//EN"
         <servlet-name>GetFileInfo</servlet-name>
         <url-pattern>/GetFileInfo</url-pattern>
     </servlet-mapping>
-    <servlet-mapping>
+ <!--    <servlet-mapping>
         <servlet-name>GetAllColeccion</servlet-name>
         <url-pattern>/GetAllColeccion</url-pattern>
     </servlet-mapping>
         <servlet-mapping>
         <servlet-name>GetAllModulos</servlet-name>
         <url-pattern>/GetAllModulos</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping> -->
     <session-config>
         <session-timeout>120</session-timeout>
     </session-config>
