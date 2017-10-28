@@ -18,10 +18,10 @@ import adyd.web.org.tsr.beans.Resultado;
 
 public class CallProceduresADyD {
 	
+	private final static Logger logger = Logger.getLogger(CallProceduresADyD.class);
 	private Connection conn;
 	private int idFile;
 	private String mensaje;
-	private final static Logger logger = Logger.getLogger(CallProceduresADyD.class);
 
 	
 	public CallProceduresADyD(Connection conn) {
@@ -68,6 +68,138 @@ public class CallProceduresADyD {
 		return salida;
 	}
 	
+	public int getFile(String call, String name) {
+		int salida = -1;
+		try {
+			logger.info("Ejecutando la busqueda de aventura ");
+			CallableStatement cstmt = conn.prepareCall(call);
+			cstmt.registerOutParameter(1, Types.INTEGER);
+			cstmt.setString(2, name);
+			cstmt.execute();
+			salida = cstmt.getInt(1);
+			cstmt.close();
+		} catch (SQLException e) {
+			logger.error("Error de BBDD ", e);
+		}
+		return salida;
+	}
+
+	//	   PROCEDURE GET_FILES_INFO (V_NOMBRE    IN     ADYD_FILES.NOMBRE%TYPE,
+//               CODIGO         OUT NUMBER, 
+//               RESULTADO      OUT VARCHAR2,
+//               ID             OUT TBL_OUTPUT,
+//               TSR_ID         OUT TBL_OUTPUT,
+//               TSR_ID2        OUT TBL_OUTPUT,
+//               NOMBRE         OUT TBL_OUTPUT,
+//               COLECCION      OUT TBL_OUTPUT,
+//               MODULO         OUT TBL_OUTPUT,
+//               RUTA           OUT TBL_OUTPUT,
+//               TAMANHO        OUT TBL_OUTPUT)
+	public GetFileInfoResponse getFileInfo(String nombre){
+		logger.info("Ejecutando la busqueda del webservice por nombre del archivo " + nombre);
+		String call = "{ call ADYD_PKG.GET_FILES_INFO(?, ?, ?, ? ,?, ? ,?, ?, ?, ?, ?) }";
+		GetFileInfoResponse gfir = new GetFileInfoResponse();
+		try {
+			CallableStatement cstmt = conn.prepareCall(call);
+			cstmt.setString(1, nombre);
+			cstmt.registerOutParameter(2, Types.INTEGER);
+			cstmt.registerOutParameter(3, Types.VARCHAR);
+			cstmt.registerOutParameter(4, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(5, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(6, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(7, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(8, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(9, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(10, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(11, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.execute();
+			Resultado res = new Resultado();
+			res.setCodigo(cstmt.getInt(2));
+			res.setMensaje(cstmt.getString(3));
+			gfir = new GetFileInfoResponse();
+			gfir.setResultado(res);
+			gfir.setListaResultados(setFileInfo(cstmt.getArray(4), 
+					cstmt.getArray(5), cstmt.getArray(6),
+					cstmt.getArray(7), cstmt.getArray(8), cstmt.getArray(9),
+					cstmt.getArray(10), cstmt.getArray(11)));
+		} catch (SQLException e) {
+			logger.error("Error en el SQL", e);
+		}
+		
+		return gfir;
+		
+	}
+	
+	public GetFileInfoResponse getAllModulos(String nombre) {
+		logger.info("Ejecutando la busqueda del webservice por nombre de modulo " + nombre);
+		String call = "{ call ADYD_PKG.GET_ALL_MODULOS(?, ?, ?, ? ,?, ? ,?, ?, ?, ?, ?) }";
+		GetFileInfoResponse gfir = new GetFileInfoResponse();
+		try {
+			CallableStatement cstmt = conn.prepareCall(call);
+			cstmt.setString(1, nombre);
+			cstmt.registerOutParameter(2, Types.INTEGER);
+			cstmt.registerOutParameter(3, Types.VARCHAR);
+			cstmt.registerOutParameter(4, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(5, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(6, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(7, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(8, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(9, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(10, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(11, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.execute();
+			Resultado res = new Resultado();
+			res.setCodigo(cstmt.getInt(2));
+			res.setMensaje(cstmt.getString(3));
+			gfir = new GetFileInfoResponse();
+			gfir.setResultado(res);
+			gfir.setListaResultados(setFileInfo(cstmt.getArray(4), 
+					cstmt.getArray(5), cstmt.getArray(6),
+					cstmt.getArray(7), cstmt.getArray(8), cstmt.getArray(9),
+					cstmt.getArray(10), cstmt.getArray(11)));
+		} catch (SQLException e) {
+			logger.error("Error en el SQL", e);
+		}
+		
+		return gfir;
+	}
+	
+	public GetFileInfoResponse getAllColecciones(String nombre) {
+		logger.info("Ejecutando la busqueda del webservice por nombre de colecciones " + nombre);
+		String call = "{ call ADYD_PKG.GET_ALL_COLECCION(?, ?, ?, ? ,?, ? ,?, ?, ?, ?, ?) }";
+		GetFileInfoResponse gfir = new GetFileInfoResponse();
+		try {
+			CallableStatement cstmt = conn.prepareCall(call);
+			cstmt.setString(1, nombre);
+			cstmt.registerOutParameter(2, Types.INTEGER);
+			cstmt.registerOutParameter(3, Types.VARCHAR);
+			cstmt.registerOutParameter(4, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(5, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(6, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(7, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(8, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(9, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(10, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.registerOutParameter(11, Types.ARRAY, "MASTER.TBL_OUTPUT");
+			cstmt.execute();
+			Resultado res = new Resultado();
+			res.setCodigo(cstmt.getInt(2));
+			res.setMensaje(cstmt.getString(3));
+			gfir = new GetFileInfoResponse();
+			gfir.setResultado(res);
+			gfir.setListaResultados(setFileInfo(cstmt.getArray(4), 
+					cstmt.getArray(5), cstmt.getArray(6),
+					cstmt.getArray(7), cstmt.getArray(8), cstmt.getArray(9),
+					cstmt.getArray(10), cstmt.getArray(11)));
+		} catch (SQLException e) {
+			logger.error("Error en el SQL", e);
+		}
+		
+		return gfir;
+	}
+	
+	
+
 	public int getIdFile() {
 		return idFile;
 	}
@@ -85,7 +217,7 @@ public class CallProceduresADyD {
 		result = prime * result + ((mensaje == null) ? 0 : mensaje.hashCode());
 		return result;
 	}
-
+	
 	public void insertFile(String call, String name, String ruta, long tamanho,
 			String tsrid, String tsrid2, int coleccion) {
 		CallableStatement cstmtFile;
@@ -118,8 +250,8 @@ public class CallProceduresADyD {
 		}
 		
 	}
-
-	public int insertModulo(String call, String modulo) {
+	
+public int insertModulo(String call, String modulo) {
 		int salida = 0;
 		try {
 			logger.info("Ejecutando la inserccion de modulo");
@@ -134,74 +266,10 @@ public class CallProceduresADyD {
 		}
 		return salida;
 	}
-	
-	public int getFile(String call, String name) {
-		int salida = -1;
-		try {
-			logger.info("Ejecutando la busqueda de aventura ");
-			CallableStatement cstmt = conn.prepareCall(call);
-			cstmt.registerOutParameter(1, Types.INTEGER);
-			cstmt.setString(2, name);
-			cstmt.execute();
-			salida = cstmt.getInt(1);
-			cstmt.close();
-		} catch (SQLException e) {
-			logger.error("Error de BBDD ", e);
-		}
-		return salida;
-	}
-	
-//	 PROCEDURE GET_FILES_INFO (V_NOMBRE    IN     ADYD_FILES.NOMBRE%TYPE,
-//             CODIGO         OUT NUMBER, 
-//             RESULTADO      OUT VARCHAR2,
-//             ID             OUT MASTER.TBL_OUTPUT,
-//             TSR_ID         OUT MASTER.TBL_OUTPUT,
-//             TSR_ID2        OUT MASTER.TBL_OUTPUT,
-//             NOMBRE         OUT MASTER.TBL_OUTPUT,
-//             COLECCION      OUT MASTER.TBL_OUTPUT,
-//             MODULO         OUT MASTER.TBL_OUTPUT)
-	public GetFileInfoResponse getFileInfo(String nombre){
-		logger.info("Ejecutando la busqueda del webservice");
-		String call = "{ call ADYD_PKG.GET_FILES_INFO(?, ?, ?, ? ,?, ? ,?, ?, ?) }";
-		GetFileInfoResponse gfir = new GetFileInfoResponse();
-		try {
-			CallableStatement cstmt = conn.prepareCall(call);
-			cstmt.setString(1, nombre);
-			cstmt.registerOutParameter(2, Types.INTEGER);
-			cstmt.registerOutParameter(3, Types.VARCHAR);
-			cstmt.registerOutParameter(4, Types.ARRAY, "MASTER.TBL_OUTPUT");
-			cstmt.registerOutParameter(5, Types.ARRAY, "MASTER.TBL_OUTPUT");
-			cstmt.registerOutParameter(6, Types.ARRAY, "MASTER.TBL_OUTPUT");
-			cstmt.registerOutParameter(7, Types.ARRAY, "MASTER.TBL_OUTPUT");
-			cstmt.registerOutParameter(8, Types.ARRAY, "MASTER.TBL_OUTPUT");
-			cstmt.registerOutParameter(9, Types.ARRAY, "MASTER.TBL_OUTPUT");
-			cstmt.execute();
-			Resultado res = new Resultado();
-			res.setCodigo(cstmt.getInt(2));
-			res.setMensaje(cstmt.getString(3));
-			gfir = new GetFileInfoResponse();
-			gfir.setResultado(res);
-			gfir.setListaResultados(setFileInfo(cstmt.getArray(4), 
-					cstmt.getArray(5), cstmt.getArray(6),
-					cstmt.getArray(7), cstmt.getArray(8), cstmt.getArray(9)));
-		} catch (SQLException e) {
-			logger.error("Error en el SQL", e);
-		}
-		
-		return gfir;
-		
-	}
-
-	public void setIdFile(int idFile) {
-		this.idFile = idFile;
-	}
-
-	public void setMensaje(String mensaje) {
-		this.mensaje = mensaje;
-	}
 
 	private List<FileInfo> setFileInfo(Array id, Array tsr_id, Array tsr_id2,
-			Array nombre, Array coleccion, Array modulo){
+			Array nombre, Array coleccion, Array modulo,
+			Array ruta, Array tamanho){
 		logger.info("Construye la respuseta");
 		List<FileInfo> lista = new ArrayList<FileInfo>();
 		try {
@@ -211,6 +279,8 @@ public class CallProceduresADyD {
 			Object[] valuesNombre = (Object[])nombre.getArray();
 			Object[] valuesColeccion = (Object[])coleccion.getArray();
 			Object[] valuesModulo = (Object[])modulo.getArray();
+			Object[] valuesRuta = (Object[]) ruta.getArray();
+			Object[] valuesTamanho = (Object[]) tamanho.getArray();
 			for(int i = 0; i < valuesId.length; i++) {
 				FileInfo fileInfo = new FileInfo();
 				fileInfo.setId((String) valuesId[i]);
@@ -219,6 +289,8 @@ public class CallProceduresADyD {
 				fileInfo.setNombre((String)valuesNombre[i]);
 				fileInfo.setColeccion((String)valuesColeccion[i]);
 				fileInfo.setModulo((String) valuesModulo[i]);
+				fileInfo.setRuta((String) valuesRuta[i]);
+				fileInfo.setTamanho((String)valuesTamanho[i]);
 				lista.add(fileInfo);
 			}
 			
@@ -228,6 +300,14 @@ public class CallProceduresADyD {
 		
 		return lista;		
 		  
+	}
+
+	public void setIdFile(int idFile) {
+		this.idFile = idFile;
+	}
+
+	public void setMensaje(String mensaje) {
+		this.mensaje = mensaje;
 	}
 
 }

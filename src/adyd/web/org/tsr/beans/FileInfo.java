@@ -2,7 +2,23 @@ package adyd.web.org.tsr.beans;
 
 public class FileInfo {
 	
-	private String id, tsr_id, tsr_id2, nombre, modulo, coleccion;
+	private String id, tsr_id, tsr_id2, nombre, modulo, coleccion, ruta, tamanho;
+
+	public String getRuta() {
+		return ruta;
+	}
+
+	public void setRuta(String ruta) {
+		this.ruta = ruta;
+	}
+
+	public String getTamanho() {
+		return tamanho;
+	}
+
+	public void setTamanho(String tamanho) {
+		this.tamanho = tamanho;
+	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -32,6 +48,16 @@ public class FileInfo {
 			if (other.nombre != null)
 				return false;
 		} else if (!nombre.equals(other.nombre))
+			return false;
+		if (ruta == null) {
+			if (other.ruta != null)
+				return false;
+		} else if (!ruta.equals(other.ruta))
+			return false;
+		if (tamanho == null) {
+			if (other.tamanho != null)
+				return false;
+		} else if (!tamanho.equals(other.tamanho))
 			return false;
 		if (tsr_id == null) {
 			if (other.tsr_id != null)
@@ -78,6 +104,8 @@ public class FileInfo {
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((modulo == null) ? 0 : modulo.hashCode());
 		result = prime * result + ((nombre == null) ? 0 : nombre.hashCode());
+		result = prime * result + ((ruta == null) ? 0 : ruta.hashCode());
+		result = prime * result + ((tamanho == null) ? 0 : tamanho.hashCode());
 		result = prime * result + ((tsr_id == null) ? 0 : tsr_id.hashCode());
 		result = prime * result + ((tsr_id2 == null) ? 0 : tsr_id2.hashCode());
 		return result;

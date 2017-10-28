@@ -1,4 +1,4 @@
-/* Formatted on 26/10/2017 10:37:23 (QP5 v5.227.12220.39754) */
+/* Formatted on 28/10/2017 18:36:07 (QP5 v5.227.12220.39754) */
 CREATE OR REPLACE PACKAGE BODY MASTER.ADYD_PKG
 AS
    FUNCTION INSERTMODULO (V_NOMBRE IN ADYD_MODULOS.TIPO%TYPE)
@@ -199,7 +199,9 @@ AS
                              TSR_ID2        OUT TBL_OUTPUT,
                              NOMBRE         OUT TBL_OUTPUT,
                              COLECCION      OUT TBL_OUTPUT,
-                             MODULO         OUT TBL_OUTPUT)
+                             MODULO         OUT TBL_OUTPUT,
+                             RUTA           OUT TBL_OUTPUT,
+                             TAMANHO        OUT TBL_OUTPUT)
    IS
       CURSOR C_FILE (
          V_NOMBRE1 IN ADYD_FILES.NOMBRE%TYPE)
@@ -210,7 +212,9 @@ AS
                    TSR_ID2,
                 FILES.NOMBRE,
                 COLECCION.NOMBRE COLECCION,
-                MODULOS.TIPO MODULO
+                MODULOS.TIPO MODULO,
+                FILES.RUTA,
+                FILES.TAMANHO
            FROM ADYD_FILES FILES
                 INNER JOIN ADYD_COLECCION COLECCION
                    ON (FILES.COLECCION_ID_FK = COLECCION.ID)
@@ -227,7 +231,9 @@ AS
          TSR_ID2     ADYD_TSR.TSR_ID2%TYPE,
          NOMBRE      ADYD_FILES.NOMBRE%TYPE,
          COLECCION   ADYD_COLECCION.NOMBRE%TYPE,
-         MODULO      ADYD_MODULOS.TIPO%TYPE
+         MODULO      ADYD_MODULOS.TIPO%TYPE,
+         RUTA        ADYD_FILES.RUTA%TYPE,
+         TAMANHO     ADYD_FILES.TAMANHO%TYPE
       );
 
 
@@ -245,6 +251,8 @@ AS
       COLECCION := TBL_OUTPUT ();
       MODULO := TBL_OUTPUT ();
       NOMBRE := TBL_OUTPUT ();
+      RUTA := TBL_OUTPUT ();
+      TAMANHO := TBL_OUTPUT ();
 
       FETCH C_FILE
          BULK COLLECT INTO DATOS;
@@ -261,6 +269,8 @@ AS
             NOMBRE.EXTEND (C_FILE%ROWCOUNT);
             COLECCION.EXTEND (C_FILE%ROWCOUNT);
             MODULO.EXTEND (C_FILE%ROWCOUNT);
+            RUTA.EXTEND (C_FILE%ROWCOUNT);
+            TAMANHO.EXTEND (C_FILE%ROWCOUNT);
 
             FOR I IN DATOS.FIRST .. DATOS.LAST
             LOOP
@@ -282,6 +292,8 @@ AS
                NOMBRE (I) := DATOS (I).NOMBRE;
                COLECCION (I) := DATOS (I).COLECCION;
                MODULO (I) := DATOS (I).MODULO;
+               RUTA (I) := DATOS (I).RUTA;
+               TAMANHO (I) := DATOS (I).TAMANHO;
             END LOOP;
          ELSE
             CODIGO := -1;
@@ -293,5 +305,235 @@ AS
       THEN
          RAISE_APPLICATION_ERROR ('-20000', 'ERROR AL GENERAR EL OUTPUT');
    END GET_FILES_INFO;
+
+
+   PROCEDURE GET_ALL_MODULOS (V_TIPO    IN     ADYD_MODULOS.TIPO%TYPE,
+                              CODIGO         OUT NUMBER,
+                              RESULTADO      OUT VARCHAR2,
+                              ID             OUT TBL_OUTPUT,
+                              TSR_ID         OUT TBL_OUTPUT,
+                              TSR_ID2        OUT TBL_OUTPUT,
+                              NOMBRE         OUT TBL_OUTPUT,
+                              COLECCION      OUT TBL_OUTPUT,
+                              MODULO         OUT TBL_OUTPUT,
+                              RUTA           OUT TBL_OUTPUT,
+                              TAMANHO        OUT TBL_OUTPUT)
+   IS
+      CURSOR C_MODULO (
+         V_TIPO IN ADYD_MODULOS.TIPO%TYPE)
+      IS
+         SELECT FILES.ID,
+                FILES.TSR_ID_FK TSR_ID,
+                CASE WHEN TSR.TSR_ID2 = 'NULL' THEN '' ELSE TSR.TSR_ID2 END
+                   TSR_ID2,
+                FILES.NOMBRE,
+                COLECCION.NOMBRE COLECCION,
+                MODULOS.TIPO MODULO,
+                FILES.RUTA,
+                FILES.TAMANHO
+           FROM ADYD_FILES FILES
+                INNER JOIN ADYD_COLECCION COLECCION
+                   ON (FILES.COLECCION_ID_FK = COLECCION.ID)
+                INNER JOIN ADYD_MODULOS MODULOS
+                   ON (FILES.ID_MODULO_FK = MODULOS.ID)
+                INNER JOIN ADYD_TSR TSR ON (FILES.TSR_ID_FK = TSR.TSR_ID1)
+          WHERE MODULOS.TIPO LIKE '%' || V_TIPO || '%';
+
+      TYPE TYPE_FILE IS RECORD
+      (
+         ID          ADYD_FILES.ID%TYPE,
+         TSR_ID      ADYD_FILES.TSR_ID_FK%TYPE,
+         TSR_ID2     ADYD_TSR.TSR_ID2%TYPE,
+         NOMBRE      ADYD_FILES.NOMBRE%TYPE,
+         COLECCION   ADYD_COLECCION.NOMBRE%TYPE,
+         MODULO      ADYD_MODULOS.TIPO%TYPE,
+         RUTA        ADYD_FILES.RUTA%TYPE,
+         TAMANHO     ADYD_FILES.TAMANHO%TYPE
+      );
+
+
+      TYPE T_TYPE_FILE IS TABLE OF TYPE_FILE
+         INDEX BY BINARY_INTEGER;
+
+      DATOS   T_TYPE_FILE;
+   BEGIN
+      --DEFINICION
+      OPEN C_MODULO (V_TIPO);
+
+      ID := TBL_OUTPUT ();
+      TSR_ID := TBL_OUTPUT ();
+      TSR_ID2 := TBL_OUTPUT ();
+      COLECCION := TBL_OUTPUT ();
+      MODULO := TBL_OUTPUT ();
+      NOMBRE := TBL_OUTPUT ();
+      RUTA := TBL_OUTPUT ();
+      TAMANHO := TBL_OUTPUT ();
+
+      FETCH C_MODULO
+         BULK COLLECT INTO DATOS;
+
+      BEGIN
+         IF (C_MODULO%ROWCOUNT <> 0)
+         THEN
+            CODIGO := 0;
+            RESULTADO := 'OK';
+            --INICIALIZACION
+            ID.EXTEND (C_MODULO%ROWCOUNT);
+            TSR_ID.EXTEND (C_MODULO%ROWCOUNT);
+            TSR_ID2.EXTEND (C_MODULO%ROWCOUNT);
+            NOMBRE.EXTEND (C_MODULO%ROWCOUNT);
+            COLECCION.EXTEND (C_MODULO%ROWCOUNT);
+            MODULO.EXTEND (C_MODULO%ROWCOUNT);
+            RUTA.EXTEND (C_MODULO%ROWCOUNT);
+            TAMANHO.EXTEND (C_MODULO%ROWCOUNT);
+
+            FOR I IN DATOS.FIRST .. DATOS.LAST
+            LOOP
+               SYS.DBMS_OUTPUT.PUT_LINE (
+                     DATOS (I).ID
+                  || ' '
+                  || DATOS (I).TSR_ID
+                  || ' '
+                  || DATOS (I).TSR_ID2
+                  || ' '
+                  || DATOS (I).NOMBRE
+                  || ' '
+                  || DATOS (I).COLECCION
+                  || ' '
+                  || DATOS (I).MODULO);
+               ID (I) := TO_CHAR (DATOS (I).ID);
+               TSR_ID (I) := TO_CHAR (DATOS (I).TSR_ID);
+               TSR_ID2 (I) := TO_CHAR (DATOS (I).TSR_ID2);
+               NOMBRE (I) := DATOS (I).NOMBRE;
+               COLECCION (I) := DATOS (I).COLECCION;
+               MODULO (I) := DATOS (I).MODULO;
+               RUTA (I) := DATOS (I).RUTA;
+               TAMANHO (I) := DATOS (I).TAMANHO;
+            END LOOP;
+         ELSE
+            CODIGO := -1;
+            RESULTADO := 'KO';
+         END IF;
+      END;
+   EXCEPTION
+      WHEN OTHERS
+      THEN
+         RAISE_APPLICATION_ERROR ('-20001', 'ERROR AL GENERAR EL OUTPUT');
+END GET_ALL_MODULOS;
+
+
+   PROCEDURE GET_ALL_COLECCION (V_NOMBRE      IN     ADYD_COLECCION.NOMBRE%TYPE,
+                                CODIGO         OUT NUMBER,
+                                RESULTADO      OUT VARCHAR2,
+                                ID             OUT TBL_OUTPUT,
+                                TSR_ID         OUT TBL_OUTPUT,
+                                TSR_ID2        OUT TBL_OUTPUT,
+                                NOMBRE         OUT TBL_OUTPUT,
+                                COLECCION      OUT TBL_OUTPUT,
+                                MODULO         OUT TBL_OUTPUT,
+                                RUTA           OUT TBL_OUTPUT,
+                                TAMANHO        OUT TBL_OUTPUT)
+   IS
+      CURSOR C_COLECCION (
+         V_NOMBRE IN ADYD_COLECCION.NOMBRE%TYPE)
+      IS
+         SELECT FILES.ID,
+                FILES.TSR_ID_FK TSR_ID,
+                CASE WHEN TSR.TSR_ID2 = 'NULL' THEN '' ELSE TSR.TSR_ID2 END
+                   TSR_ID2,
+                FILES.NOMBRE,
+                COLECCION.NOMBRE COLECCION,
+                MODULOS.TIPO MODULO,
+                FILES.RUTA,
+                FILES.TAMANHO
+           FROM ADYD_FILES FILES
+                INNER JOIN ADYD_COLECCION COLECCION
+                   ON (FILES.COLECCION_ID_FK = COLECCION.ID)
+                INNER JOIN ADYD_MODULOS MODULOS
+                   ON (FILES.ID_MODULO_FK = MODULOS.ID)
+                INNER JOIN ADYD_TSR TSR ON (FILES.TSR_ID_FK = TSR.TSR_ID1)
+          WHERE COLECCION.NOMBRE LIKE '%' || V_NOMBRE || '%';
+
+      TYPE TYPE_FILE IS RECORD
+      (
+         ID          ADYD_FILES.ID%TYPE,
+         TSR_ID      ADYD_FILES.TSR_ID_FK%TYPE,
+         TSR_ID2     ADYD_TSR.TSR_ID2%TYPE,
+         NOMBRE      ADYD_FILES.NOMBRE%TYPE,
+         COLECCION   ADYD_COLECCION.NOMBRE%TYPE,
+         MODULO      ADYD_MODULOS.TIPO%TYPE,
+         RUTA        ADYD_FILES.RUTA%TYPE,
+         TAMANHO     ADYD_FILES.TAMANHO%TYPE
+      );
+
+
+      TYPE T_TYPE_FILE IS TABLE OF TYPE_FILE
+         INDEX BY BINARY_INTEGER;
+
+      DATOS   T_TYPE_FILE;
+   BEGIN
+      --DEFINICION
+      OPEN C_COLECCION (V_NOMBRE);
+
+      ID := TBL_OUTPUT ();
+      TSR_ID := TBL_OUTPUT ();
+      TSR_ID2 := TBL_OUTPUT ();
+      COLECCION := TBL_OUTPUT ();
+      MODULO := TBL_OUTPUT ();
+      NOMBRE := TBL_OUTPUT ();
+      RUTA := TBL_OUTPUT ();
+      TAMANHO := TBL_OUTPUT ();
+
+      FETCH C_COLECCION
+         BULK COLLECT INTO DATOS;
+
+      BEGIN
+         IF (C_COLECCION%ROWCOUNT <> 0)
+         THEN
+            CODIGO := 0;
+            RESULTADO := 'OK';
+            --INICIALIZACION
+            ID.EXTEND (C_COLECCION%ROWCOUNT);
+            TSR_ID.EXTEND (C_COLECCION%ROWCOUNT);
+            TSR_ID2.EXTEND (C_COLECCION%ROWCOUNT);
+            NOMBRE.EXTEND (C_COLECCION%ROWCOUNT);
+            COLECCION.EXTEND (C_COLECCION%ROWCOUNT);
+            MODULO.EXTEND (C_COLECCION%ROWCOUNT);
+            RUTA.EXTEND (C_COLECCION%ROWCOUNT);
+            TAMANHO.EXTEND (C_COLECCION%ROWCOUNT);
+
+            FOR I IN DATOS.FIRST .. DATOS.LAST
+            LOOP
+               SYS.DBMS_OUTPUT.PUT_LINE (
+                     DATOS (I).ID
+                  || ' '
+                  || DATOS (I).TSR_ID
+                  || ' '
+                  || DATOS (I).TSR_ID2
+                  || ' '
+                  || DATOS (I).NOMBRE
+                  || ' '
+                  || DATOS (I).COLECCION
+                  || ' '
+                  || DATOS (I).MODULO);
+               ID (I) := TO_CHAR (DATOS (I).ID);
+               TSR_ID (I) := TO_CHAR (DATOS (I).TSR_ID);
+               TSR_ID2 (I) := TO_CHAR (DATOS (I).TSR_ID2);
+               NOMBRE (I) := DATOS (I).NOMBRE;
+               COLECCION (I) := DATOS (I).COLECCION;
+               MODULO (I) := DATOS (I).MODULO;
+               RUTA (I) := DATOS (I).RUTA;
+               TAMANHO (I) := DATOS (I).TAMANHO;
+            END LOOP;
+         ELSE
+            CODIGO := -1;
+            RESULTADO := 'KO';
+         END IF;
+      END;
+   EXCEPTION
+      WHEN OTHERS
+      THEN
+         RAISE_APPLICATION_ERROR ('-20001', 'ERROR AL GENERAR EL OUTPUT');
+   END GET_ALL_COLECCION;
 END ADYD_PKG;
 /
