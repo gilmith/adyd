@@ -56,5 +56,19 @@ public class GetFileInfoImpl implements GetFileInfo {
 		return getFileInfoResponse;
 	}
 
+	@Override
+	public GetFileInfoResponse getFileInfoObj(String nombre) {
+PropertyConfigurator.configure("C:\\Users\\Jacobo\\apache-tomcat-8.5.23\\conf\\log4j.properties");		
+		
+		GetFileInfoResponse getFileInfoResponse = new GetFileInfoResponse();
+		Conector conector = new Conector();
+		Connection conn =  conector.getContextConection();
+		CallProceduresADyD procedure = new CallProceduresADyD(conn);
+		getFileInfoResponse = procedure.getFileInfoObj(nombre);
+		
+		return getFileInfoResponse;
+
+	}
+
 
 }

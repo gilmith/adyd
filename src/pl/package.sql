@@ -1,4 +1,3 @@
-/* Formatted on 28/10/2017 19:07:06 (QP5 v5.227.12220.39754) */
 CREATE OR REPLACE PACKAGE MASTER.ADYD_PKG
 IS
    FUNCTION INSERTMODULO (V_NOMBRE IN ADYD_MODULOS.TIPO%TYPE)
@@ -58,5 +57,10 @@ IS
                                 MODULO         OUT TBL_OUTPUT,
                                 RUTA           OUT TBL_OUTPUT,
                                 TAMANHO        OUT TBL_OUTPUT);
+                                
+    PROCEDURE GET_FILE_INFO_OBJ(V_NOMBRE IN ADYD_FILES.NOMBRE%TYPE,
+                                CODIGO OUT NUMBER,
+                                RESULTADO OUT VARCHAR2,
+                                ARRAY OUT ARRAY_RESPUESTA);                                 
 END ADYD_PKG;
 /

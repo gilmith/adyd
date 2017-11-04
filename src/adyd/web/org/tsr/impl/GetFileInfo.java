@@ -22,4 +22,7 @@ public interface GetFileInfo {
 	
 	@WebMethod
 	public GetFileInfoResponse getAllModulos(String nombre);
+	
+	@WebMethod
+	public GetFileInfoResponse getFileInfoObj(String nombre);
 }

@@ -1,4 +1,3 @@
-/* Formatted on 28/10/2017 18:36:07 (QP5 v5.227.12220.39754) */
 CREATE OR REPLACE PACKAGE BODY MASTER.ADYD_PKG
 AS
    FUNCTION INSERTMODULO (V_NOMBRE IN ADYD_MODULOS.TIPO%TYPE)
@@ -410,6 +409,7 @@ AS
                RUTA (I) := DATOS (I).RUTA;
                TAMANHO (I) := DATOS (I).TAMANHO;
             END LOOP;
+            CLOSE C_MODULO;
          ELSE
             CODIGO := -1;
             RESULTADO := 'KO';
@@ -525,6 +525,7 @@ END GET_ALL_MODULOS;
                RUTA (I) := DATOS (I).RUTA;
                TAMANHO (I) := DATOS (I).TAMANHO;
             END LOOP;
+            CLOSE C_COLECCION;
          ELSE
             CODIGO := -1;
             RESULTADO := 'KO';
@@ -535,5 +536,77 @@ END GET_ALL_MODULOS;
       THEN
          RAISE_APPLICATION_ERROR ('-20001', 'ERROR AL GENERAR EL OUTPUT');
    END GET_ALL_COLECCION;
+   
+   
+   PROCEDURE GET_FILE_INFO_OBJ(V_NOMBRE IN ADYD_FILES.NOMBRE%TYPE,
+                                CODIGO OUT NUMBER,
+                                RESULTADO OUT VARCHAR2,
+                                ARRAY OUT ARRAY_RESPUESTA)
+    IS
+                                
+     CURSOR C_FILE (
+         V_NOMBRE1 IN ADYD_FILES.NOMBRE%TYPE)
+      IS
+         SELECT FILES.ID,
+                FILES.TSR_ID_FK TSR_ID,
+                CASE WHEN TSR.TSR_ID2 = 'NULL' THEN '' ELSE TSR.TSR_ID2 END
+                   TSR_ID2,
+                FILES.NOMBRE,
+                COLECCION.NOMBRE COLECCION,
+                MODULOS.TIPO MODULO,
+                FILES.RUTA,
+                FILES.TAMANHO
+           FROM ADYD_FILES FILES
+                INNER JOIN ADYD_COLECCION COLECCION
+                   ON (FILES.COLECCION_ID_FK = COLECCION.ID)
+                INNER JOIN ADYD_MODULOS MODULOS
+                   ON (FILES.ID_MODULO_FK = MODULOS.ID)
+                INNER JOIN ADYD_TSR TSR ON (FILES.TSR_ID_FK = TSR.TSR_ID1)
+          WHERE FILES.NOMBRE LIKE '%' || V_NOMBRE1 || '%';
+          TYPE TYPE_FILE IS RECORD
+      (
+         ID          ADYD_FILES.ID%TYPE,
+         TSR_ID      ADYD_FILES.TSR_ID_FK%TYPE,
+         TSR_ID2     ADYD_TSR.TSR_ID2%TYPE,
+         NOMBRE      ADYD_FILES.NOMBRE%TYPE,
+         COLECCION   ADYD_COLECCION.NOMBRE%TYPE,
+         MODULO      ADYD_MODULOS.TIPO%TYPE,
+         RUTA        ADYD_FILES.RUTA%TYPE,
+         TAMANHO     ADYD_FILES.TAMANHO%TYPE
+      );
+
+
+      TYPE T_TYPE_FILE IS TABLE OF TYPE_FILE
+         INDEX BY BINARY_INTEGER;
+
+      DATOS   T_TYPE_FILE;     
+      RESP RESPUESTA;
+    BEGIN        
+
+        OPEN C_FILE(V_NOMBRE);
+        
+        FETCH C_FILE
+         BULK COLLECT INTO DATOS;
+         
+        IF (C_FILE%ROWCOUNT = 0 ) THEN
+            CODIGO := '-1';
+            RESULTADO :='KO';
+        ELSE
+            ARRAY := ARRAY_RESPUESTA();
+            ARRAY.EXTEND(C_FILE%ROWCOUNT);
+            CODIGO := '0';
+            RESULTADO :='OK';
+            FOR I IN DATOS.FIRST .. DATOS.LAST LOOP
+               RESP := RESPUESTA(TO_CHAR (DATOS (I).ID), TO_CHAR (DATOS (I).TSR_ID), TO_CHAR (DATOS (I).TSR_ID2),
+               DATOS (I).NOMBRE, DATOS (I).COLECCION, DATOS (I).MODULO, DATOS (I).RUTA, DATOS (I).TAMANHO);     
+               ARRAY(I):= RESP;   
+            END LOOP;
+            CLOSE C_FILE;
+        END IF;     
+        EXCEPTION
+        WHEN OTHERS
+         THEN
+         RAISE_APPLICATION_ERROR ('-20000', 'ERROR AL GENERAR EL OUTPUT');
+    END GET_FILE_INFO_OBJ;
 END ADYD_PKG;
 /
